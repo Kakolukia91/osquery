@@ -265,6 +265,26 @@ function(add_osquery_library)
   add_library(${osquery_lib_name} ${osquery_lib_args})
 endfunction()
 
+function(add_osquery_shared_library)
+  set(osquery_lib_options STATIC;SHARED;MODULE;OBJECT;UNKNOWN;EXCLUDE_FROM_ALL;IMPORTED;GLOBAL;INTERFACE)
+  set(osquery_lib_ARGN ${ARGN})
+
+  list(GET osquery_lib_ARGN 0 osquery_lib_name)
+  list(REMOVE_AT osquery_lib_ARGN 0)
+
+  foreach(arg ${osquery_lib_ARGN})
+    list(FIND osquery_lib_options "${arg}" arg_POS)
+    if(${arg_POS} EQUAL -1 AND NOT IS_ABSOLUTE "${arg}")
+      set(base_path "${CMAKE_CURRENT_SOURCE_DIR}")
+      list(APPEND osquery_lib_args "${base_path}/${arg}")
+    else()
+      list(APPEND osquery_lib_args "${arg}")
+    endif()
+  endforeach()
+
+  add_library(${osquery_lib_name} SHARED ${osquery_lib_args})
+endfunction()
+
 # This function modifies an existing cache variable but without changing its description
 function(overwrite_cache_variable variable_name type value)
   get_property(current_help_string CACHE "${variable_name}" PROPERTY HELPSTRING)

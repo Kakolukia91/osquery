@@ -33,5 +33,7 @@ class GlobalUsersGroupsCache {
   friend class Initializer;
   friend void initUsersAndGroupsServices(bool, bool);
   friend void deinitUsersAndGroupsServices(bool, bool);
+  friend void libosqueryInitialise();
+  friend void libosqueryShutdown();
 };
 } // namespace osquery
