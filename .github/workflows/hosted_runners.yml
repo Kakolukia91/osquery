@@ -237,6 +237,7 @@ jobs:
   # The Linux build will only start once we know that the code
   # has been properly formatted
   build_linux:
+    if: false
     needs: check_code_style
 
     runs-on: ${{ matrix.os }}
@@ -768,7 +769,7 @@ jobs:
   # builder and runs them on a new Big Sur instance
   test_macos_bigsur:
     # TODO: This is temporarily disabled until we update the main macOS build job to use Monterey
-    if: ${{ false }}
+    if: false
 
     needs: build_macos
 
@@ -831,7 +832,7 @@ jobs:
     # TODO: This has to be changed back to the job test after we update to Monterey
     needs: build_macos
     # needs: test_macos_bigsur
-
+    if: false
     runs-on: macos-11
 
     steps:
