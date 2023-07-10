@@ -18,10 +18,6 @@ function(generateLibosqueryFiles)
 
   add_osquery_shared_library(libosquery ${source_files})
 
-  if(DEFINED PLATFORM_WINDOWS)
-    target_sources(libosquery PRIVATE "${TOOLS_WEL_FILES_ROOT_DIR}/windows_resources.rc")
-  endif()  
-
   set(public_header_files
     osquery.h
   )
@@ -42,6 +38,10 @@ function(generateLibosqueryFiles)
     specs_tables
     thirdparty_boost
   )
+endfunction()
+
+function(enableLibOsqueryWEL)
+  target_sources(libosquery PRIVATE "${TOOLS_WEL_FILES_ROOT_DIR}/windows_resources.rc")
 endfunction()
 
 libosqueryMain()
