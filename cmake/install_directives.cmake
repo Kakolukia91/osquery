@@ -67,6 +67,11 @@ function(generateInstallDirectives)
       DESTINATION "bin"
     )
 
+    install(
+      TARGETS libosquery
+      DESTINATION "bin"
+    )
+
     execute_process(
       COMMAND "${CMAKE_COMMAND}" -E create_symlink osqueryd osqueryi
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
@@ -149,6 +154,11 @@ function(generateInstallDirectives)
     install(
       TARGETS osqueryd
       DESTINATION "osqueryd"
+    )
+
+    install(
+      TARGETS libosquery
+      DESTINATION "libosquery"
     )
 
     install(
@@ -279,6 +289,11 @@ function(generateInstallDirectives)
 
     install(
       TARGETS osqueryd
+      DESTINATION "bin"
+    )
+
+    install(
+      TARGETS libosquery
       DESTINATION "bin"
     )
 
