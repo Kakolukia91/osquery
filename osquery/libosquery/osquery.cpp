@@ -77,9 +77,7 @@ char* libosqueryQueryJson(const char* query, int* errorCode) {
       const std::size_t queryJsonLen = queryJson.size();
 
       result = (char*)malloc(queryJsonLen + 1);
-
-      strncpy_s(result, queryJsonLen + 1, queryJson.c_str(), queryJsonLen);
-      result[queryJsonLen] = '\0';
+      std::strcpy(result, queryJson.c_str());
     }
   }
 
