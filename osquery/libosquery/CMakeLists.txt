@@ -18,25 +18,35 @@ function(generateLibosqueryFiles)
 
   add_osquery_shared_library(libosquery ${source_files})
 
+  set_target_properties(libosquery PROPERTIES PREFIX "")
+
   set(public_header_files
     osquery.h
   )
   generateIncludeNamespace(libosquery "osquery/libosquery" "FULL_PATH" ${public_header_files})
 
   target_link_libraries(libosquery PRIVATE
+    osquery_core
     osquery_cxx_settings
+    osquery_core_plugins
     osquery_database
     osquery_sql
     osquery_utils
-    osquery_events
+    osquery_events    
     osquery_extensions
     osquery_extensions_implthrift
     osquery_remote_enroll_tlsenroll
+    plugins_database_rocksdbplugin    
+    osquery_carver
+    osquery_distributed
+    osquery_logger_datalogger
+    osquery_process
+    osquery_profiler    
     osquery_utils_conversions
-    osquery_utils_info
-    plugins_config_tlsconfig
+    osquery_utils_info   
+    plugins_config_tlsconfig     
     specs_tables
-    thirdparty_boost
+    thirdparty_boost    
   )
 endfunction()
 

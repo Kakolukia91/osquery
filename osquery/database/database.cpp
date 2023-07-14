@@ -471,6 +471,10 @@ void setDatabaseAllowOpen(bool allow_open) {
   kDBAllowOpen = allow_open;
 }
 
+void setDatabasePath(const char* databasePath) {
+  FLAGS_database_path = databasePath;
+}
+
 Status initDatabasePlugin() {
   if (kDBInitialized) {
     return Status::success();

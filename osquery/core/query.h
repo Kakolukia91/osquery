@@ -137,6 +137,18 @@ class Query {
       : query_(q.query), name_(std::move(name)) {}
 
   /**
+   * @brief Constructor which sets up necessary parameters using the raw SQL query string.
+   *
+   * Given a raw SQL query string, this constructor calculates the value of columnFamily_,
+   * which can be accessed via the getColumnFamilyName getter method.
+   *
+   * @param name The query name.
+   * @param q a raw SQL query string.
+   */
+  explicit Query(std::string name, const std::string& querySql)
+      : query_(querySql), name_(std::move(name)) {}
+
+  /**
    * @brief Deserialize the data in RocksDB into a useful data structure
    *
    * This method retrieves the data from RocksDB and returns the data in a

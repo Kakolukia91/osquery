@@ -254,6 +254,9 @@ void dumpDatabase();
 /// Allow database usage creations.
 void setDatabaseAllowOpen(bool allow_open = true);
 
+/// Set the database path to a custom one
+void setDatabasePath(const char* databasePath);
+
 /**
  * @brief Allow a caller to check the active database plugin.
  *

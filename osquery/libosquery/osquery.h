@@ -25,9 +25,9 @@
 #endif
 
 namespace osquery {
-LIB_API(void) libosqueryInitialise();
+LIB_API(void) libosqueryInitialise(const char* databasePath);
 
-LIB_API(char*) libosqueryQueryJson(const char* query, int* errorCode);
+LIB_API(char*) libosqueryQueryJson(const char* queryName, const char* querySql, int* errorCode);
 
 LIB_API(void) libosqueryFreeQueryResult(char* query);
 
