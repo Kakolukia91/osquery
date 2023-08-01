@@ -10,8 +10,8 @@
 #include "osquery.h"
 
 #include <osquery/core/system.h>
-#include <osquery/hashing/hashing.h>
 #include <osquery/database/database.h>
+#include <osquery/hashing/hashing.h>
 #include <osquery/registry/registry_factory.h>
 #include <osquery/sql/sqlite_util.h>
 #include <osquery/utils/system/time.h>
@@ -24,6 +24,22 @@
 #endif
 
 namespace osquery {
+DECLARE_string(config_plugin);
+DECLARE_string(logger_plugin);
+DECLARE_string(numeric_monitoring_plugins);
+DECLARE_string(distributed_plugin);
+DECLARE_bool(config_check);
+DECLARE_bool(config_dump);
+DECLARE_bool(database_dump);
+DECLARE_string(database_path);
+DECLARE_bool(disable_distributed);
+DECLARE_bool(disable_database);
+DECLARE_bool(disable_events);
+DECLARE_bool(disable_logging);
+DECLARE_bool(enable_numeric_monitoring);
+DECLARE_bool(ignore_table_exceptions);
+DECLARE_bool(ignore_registry_exceptions);
+
 Status sqlQueryToJson(const std::string& name,
                       const std::string& querySql,
                       std::string& jsonResult) {
@@ -34,62 +50,18 @@ Status sqlQueryToJson(const std::string& name,
     return Status::failure("Error executing scheduled query");
   }
 
-  std::string ident = getHostIdentifier();
-
-  QueryLogItem item;
-  item.name = name;
-  item.identifier = ident;
-  item.time = osquery::getUnixTime();
-  item.epoch = 0;
-  item.calendar_time = osquery::getAsciiTime();
-  item.isSnapshot = false;
-
-  // Set counter to 1 here to be able to tell if this was a new epoch
-  // (counter=0) in the differential stream. Whenever actually logging
-  // results below, this counter value will have been overwritten in
-  // addNewResults.
-  item.counter = 1;
-
-  // Create a database-backed set of query results.
-  auto dbQuery = Query(name, querySql);
-  // Comparisons and stores must include escaped data.
-  sql.escapeResults();
-  Status status;
-  DiffResults& diff_results = item.results;
-  // Add this execution's set of results to the database-tracked named query.
-  // We can then ask for a differential from the last time this named query
-  // was executed by exact matching each row.
-  status = dbQuery.addNewResults(
-      std::move(sql.rowsTyped()), item.epoch, item.counter, diff_results);
-
-  if (!status.ok()) {
-    return status;
-  }
-
-  if (diff_results.hasNoResults()) {
-    // No diff results to set
-    return status;
-  }
-
-  for (auto& removed : diff_results.removed) {
+  QueryDataTyped queryData = sql.rowsTyped();
+  for (auto& rows : queryData) {
     std::ostringstream allColumnValues;
-    for (const auto& col : removed) {
+    for (const auto& col : rows) {
       allColumnValues << col.second;
     }
     const std::string& toHash = allColumnValues.str();
-    removed["Hash"] = hashFromBuffer(HASH_TYPE_MD5, toHash.c_str(), toHash.size());
+    rows["Hash"] =
+        hashFromBuffer(HASH_TYPE_MD5, toHash.c_str(), toHash.size());
   }
 
-  for (auto& added : diff_results.added) {
-    std::ostringstream allColumnValues;
-    for (const auto& col : added) {
-      allColumnValues << col.second;
-    }
-    const std::string& toHash = allColumnValues.str();
-    added["Hash"] = hashFromBuffer(HASH_TYPE_MD5, toHash.c_str(), toHash.size());
-  }  
-
-  status = serializeQueryLogItemJSON(item, jsonResult);
+  Status status = serializeQueryDataJSON(queryData, jsonResult, true);
 
   return status;
 }
@@ -97,6 +69,12 @@ Status sqlQueryToJson(const std::string& name,
 
 namespace osquery {
 void libosqueryInitialise(const char* databasePath) {
+  FLAGS_ignore_table_exceptions = true;
+  FLAGS_ignore_registry_exceptions = true;
+  FLAGS_disable_logging = true;
+
+  FLAGS_database_path = databasePath;
+
 #ifdef OSQUERY_WINDOWS
   std::promise<void> users_cache_promise;
   GlobalUsersGroupsCache::global_users_cache_future_ =
@@ -115,17 +93,20 @@ void libosqueryInitialise(const char* databasePath) {
       GlobalUsersGroupsCache::global_groups_cache_));
 #endif
 
-  setDatabasePath(databasePath);
-
   platformSetup();
   registryAndPluginInit();
 
   setDatabaseAllowOpen();
   initDatabasePlugin();
+  upgradeDatabase();
   resetDatabase();
+  Registry::setUp();
 }
 
 void libosqueryShutdown() {
+  Dispatcher::stopServices();
+  Dispatcher::joinServices();
+
   shutdownDatabase();
   platformTeardown();
 

@@ -47,6 +47,17 @@ function(generateLibosqueryFiles)
     plugins_config_tlsconfig     
     specs_tables
     thirdparty_boost    
+    osquery_core_sql
+    osquery_filesystem
+    osquery_registry
+    osquery_utils_system_env
+    osquery_utils_system_systemutils
+    osquery_utils_system_time
+    osquery_logger
+    thirdparty_gflags
+    thirdparty_glog
+    thirdparty_openssl
+    thirdparty_sqlite    
   )
 endfunction()
 
