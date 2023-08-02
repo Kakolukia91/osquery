@@ -57,8 +57,7 @@ Status sqlQueryToJson(const std::string& name,
       allColumnValues << col.second;
     }
     const std::string& toHash = allColumnValues.str();
-    rows["Hash"] =
-        hashFromBuffer(HASH_TYPE_MD5, toHash.c_str(), toHash.size());
+    rows["Hash"] = hashFromBuffer(HASH_TYPE_MD5, toHash.c_str(), toHash.size());
   }
 
   Status status = serializeQueryDataJSON(queryData, jsonResult, true);
@@ -104,8 +103,10 @@ void libosqueryInitialise(const char* databasePath) {
 }
 
 void libosqueryShutdown() {
+#ifdef OSQUERY_WINDOWS
   Dispatcher::stopServices();
   Dispatcher::joinServices();
+#endif
 
   shutdownDatabase();
   platformTeardown();
